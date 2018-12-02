@@ -119,6 +119,10 @@ namespace PhotoLab
                 }
             }
         }
+        private void ImageGridView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            this.Frame.Navigate(typeof(DetailPage), e.ClickedItem);
+        }
         private void DetermineItemSize()
         {
             if (FitScreenToggle != null
