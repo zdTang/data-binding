@@ -51,13 +51,17 @@ namespace PhotoLab
             this.InitializeComponent();
         }
 
+
+        private void DeleteSelectedImage() =>
+        Images.Remove(ImageGridView.SelectedItem as ImageFileInfo);
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility =
                 AppViewBackButtonVisibility.Collapsed;
 
             // Remove this when replaced with XAML bindings
-            ImageGridView.ItemsSource = Images;
+            //ImageGridView.ItemsSource = Images;
+
 
             if (Images.Count == 0)
             {

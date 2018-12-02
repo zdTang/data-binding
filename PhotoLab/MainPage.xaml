@@ -137,9 +137,13 @@
             <AppBarButton Icon="Zoom"
                           Label="Zoom"
                           Flyout="{StaticResource zoomFlyout}" />
+            <AppBarButton Icon="Delete"
+              Label="Delete selected image"
+              Click="{x:Bind DeleteSelectedImage}" />
         </CommandBar>
 
         <GridView x:Name="ImageGridView"
+                  ItemsSource="{x:Bind Images}" 
                   animations:ReorderGridAnimation.Duration="400"
                   Margin="0,0,0,8"
                   IsItemClickEnabled="True"
