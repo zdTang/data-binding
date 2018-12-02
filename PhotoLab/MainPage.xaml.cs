@@ -40,12 +40,24 @@ using Windows.UI.Xaml.Navigation;
 
 namespace PhotoLab
 {
-    public sealed partial class MainPage : Page
+    public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
         private ImageFileInfo persistedItem;
-
+        public event PropertyChangedEventHandler PropertyChanged;
         public ObservableCollection<ImageFileInfo> Images { get; } = new ObservableCollection<ImageFileInfo>();
-
+        public double ItemSize
+        {
+            get => _itemSize;
+            set
+            {
+                if (_itemSize != value)
+                {
+                    _itemSize = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ItemSize)));
+                }
+            }
+        }
+        private double _itemSize;
         public MainPage()
         {
             this.InitializeComponent();
@@ -107,8 +119,45 @@ namespace PhotoLab
                 }
             }
         }
+        private void DetermineItemSize()
+        {
+            if (FitScreenToggle != null
+                && FitScreenToggle.IsOn == true
+                && ImageGridView != null
+                && ZoomSlider != null)
+            {
+                // The 'margins' value represents the total of the margins around the
+                // image in the grid item. 8 from the ItemTemplate root grid + 8 from
+                // the ItemContainerStyle * (Right + Left). If those values change, 
+                // this value needs to be updated to match.
+                int margins = (int)this.Resources["LargeItemMarginValue"] * 4;
+                double gridWidth = ImageGridView.ActualWidth -
+                     (int)this.Resources["DesktopWindowSidePaddingValue"];
 
-       public async static Task<ImageFileInfo> LoadImageInfo(StorageFile file)
+                if (AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile" &&
+                    UIViewSettings.GetForCurrentView().UserInteractionMode ==
+                         UserInteractionMode.Touch)
+                {
+                    margins = (int)this.Resources["SmallItemMarginValue"] * 4;
+                    gridWidth = ImageGridView.ActualWidth -
+                         (int)this.Resources["MobileWindowSidePaddingValue"];
+                }
+
+                double ItemWidth = ZoomSlider.Value + margins;
+                // We need at least 1 column.
+                int columns = (int)Math.Max(gridWidth / ItemWidth, 1);
+
+                // Adjust the available grid width to account for margins around each item.
+                double adjustedGridWidth = gridWidth - (columns * margins);
+
+                ItemSize = (adjustedGridWidth / columns);
+            }
+            else
+            {
+                ItemSize = ZoomSlider.Value;
+            }
+        }
+        public async static Task<ImageFileInfo> LoadImageInfo(StorageFile file)
         {
             // Open a stream for the selected file.
             // The 'using' block ensures the stream is disposed
